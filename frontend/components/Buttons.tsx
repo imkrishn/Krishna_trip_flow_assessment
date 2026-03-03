@@ -1,12 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import MakeTripPlan from "./MakeTripPlan";
 
 export const CreateTripPlanBtn = () => {
+  const [onClickPlan, setOnClickPlan] = useState(false);
   return (
-    <button className="cursor-pointer rounded-md bg-linear-to-r from-emerald-400 to-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg hover:from-emerald-600 hover:to-green-700 active:scale-[0.97]">
-      + Make Trip Plan
-    </button>
+    <>
+      <button
+        onClick={() => setOnClickPlan(true)}
+        className="cursor-pointer rounded-md bg-linear-to-r from-emerald-400 to-green-600 px-4 py-2.5 lg:text-sm text-xs font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg hover:from-emerald-600 hover:to-green-700 active:scale-[0.97]"
+      >
+        + Make Trip Plan
+      </button>
+      {onClickPlan && <MakeTripPlan onClose={() => setOnClickPlan(false)} />}
+    </>
   );
 };
 
