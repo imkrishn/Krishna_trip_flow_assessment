@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 
 class Trip(models.Model):
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     current_location = models.CharField(max_length=255)
     pickup_location = models.CharField(max_length=255)
@@ -19,7 +20,9 @@ class Trip(models.Model):
 
     distance_miles = models.FloatField(null=True, blank=True)
     duration_hours = models.FloatField(null=True, blank=True)
-    fuel_stops = models.IntegerField(null=True, blank=True)
+
+    fuel_stops = models.JSONField(default=list)
+    rest_stops = models.JSONField(default=list)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
