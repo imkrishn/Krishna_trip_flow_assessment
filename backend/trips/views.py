@@ -66,7 +66,8 @@ class TripView(APIView):
                 "pickup_to_dropoff": route_data["pickup_to_dropoff"],
                 "fuel_stops": data["fuel_stops"],
                 "rest_stops": data["rest_stops"],
-                "eld_logs": eld_logs
+                "eld_logs": eld_logs,
+                "current_cycle_used":current_cycle_used
             }, status=status.HTTP_200_OK)
 
         except Trip.DoesNotExist:
@@ -74,3 +75,10 @@ class TripView(APIView):
                 {"error": "Trip not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+    def get(self,request):
+        trips = Trip.objects.all()
+
+        serializer = TripSerializer(trips, many=True)
+
+        return Response(serializer.data)
