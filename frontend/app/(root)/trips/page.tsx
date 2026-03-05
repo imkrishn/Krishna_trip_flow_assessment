@@ -1,42 +1,124 @@
 "use client";
 
 import TripCard from "@/components/TripCard";
-import { useState } from "react";
+import TripsPageSkeleton from "@/components/loading/loadingTripCards";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-type TabType = "Ongoing" | "Completed" | "Warning" | "Drafted";
+type TabType = "All" | "Ongoing" | "Completed" | "Drafted";
+type BackendStatus = "ONGOING" | "FINISHED" | "DRAFTED";
 
-const page = () => {
-  const [currentTab, setCurrentTab] = useState<TabType>("Ongoing");
-  const tabs: TabType[] = ["Ongoing", "Completed", "Warning", "Drafted"];
+interface Trip {
+  id: string;
+  pickup_location: string;
+  dropoff_location: string;
+  distance_miles: number;
+  duration_hours: number;
+  fuel_stops: any[];
+  status: BackendStatus;
+}
+
+const tabToBackendStatus: Record<Exclude<TabType, "All">, BackendStatus> = {
+  Ongoing: "ONGOING",
+  Completed: "FINISHED",
+  Drafted: "DRAFTED",
+};
+
+export default function Page() {
+  const [currentTab, setCurrentTab] = useState<TabType>("All");
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const tabs: TabType[] = ["All", "Ongoing", "Completed", "Drafted"];
+
+  //fetch all trips of user
+
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/trips/`,
+          { cache: "no-store" },
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to fetch trips");
+        }
+
+        setTrips(data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load trips");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrips();
+  }, []);
+
+  //show all tab status
+  const filteredTrips =
+    currentTab === "All"
+      ? trips
+      : trips.filter((trip) => trip.status === tabToBackendStatus[currentTab]);
+
+  const getTabCount = (tab: TabType) => {
+    if (tab === "All") return trips.length;
+
+    return trips.filter((trip) => trip.status === tabToBackendStatus[tab])
+      .length;
+  };
+
   return (
-    <main className="lg:px-11 px-4 py-6 bg-[#f8f8f85e] h-screen overflow-auto">
-      <div className="inline-flex rounded-xl mb-3 gap-2 ">
+    <main className="lg:px-11 px-4 py-6 bg-[#f8f8f85e] min-h-screen overflow-auto">
+      <div className="flex gap-6 border-b border-gray-200 mb-6">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setCurrentTab(tab)}
-            className={` p-2 lg:text-sm text-xs font-medium cursor-pointer transition-all duration-200 ${
+            className={`pb-2 text-sm font-medium transition flex items-center gap-2 ${
               currentTab === tab
-                ? "border-b-4 border-green-400  text-slate-900 "
+                ? "border-b-4 border-green-400 text-slate-900"
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
             {tab}
+            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+              {getTabCount(tab)}
+            </span>
           </button>
         ))}
       </div>
-      {["!", "!", "!"].map((_, index) => (
-        <TripCard
-          key={index}
-          title={`Trip ${index + 1}`}
-          distance={`${(index + 1) * 500} miles`}
-          duration={`${(index + 1) * 5} hours driving`}
-          fuelStops={index + 1}
-          status={index % 2 === 0 ? "Ongoing" : "Completed"}
-        />
-      ))}
+
+      {loading && <TripsPageSkeleton />}
+
+      {!loading && filteredTrips.length === 0 && (
+        <div className="text-gray-400 text-sm">No trips found</div>
+      )}
+
+      {!loading && (
+        <div className="space-y-4">
+          {filteredTrips.map((trip) => (
+            <TripCard
+              key={trip.id}
+              title={`${trip.pickup_location} → ${trip.dropoff_location}`}
+              distance={`${trip.distance_miles?.toFixed(2)} miles`}
+              duration={`${trip.duration_hours?.toFixed(2)} hours`}
+              fuelStops={trip.fuel_stops?.length ?? 0}
+              status={
+                trip.status === "ONGOING"
+                  ? "Ongoing"
+                  : trip.status === "FINISHED"
+                    ? "Completed"
+                    : "Drafted"
+              }
+            />
+          ))}
+        </div>
+      )}
     </main>
   );
-};
-
-export default page;
+}
