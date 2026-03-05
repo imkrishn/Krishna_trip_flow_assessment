@@ -2,17 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .services import (
-    create_trip_plan,
-    get_route,
-    generate_eld_logs
-)
-
+from .services import create_trip_plan, get_route, generate_eld_logs
 from .models import Trip
 from .serializers import TripSerializer
 
 
-class TripView(APIView):
+class TripListView(APIView):
 
     def post(self, request):
 
@@ -30,16 +25,26 @@ class TripView(APIView):
 
         return Response(result, status=200)
 
+    def get(self, request):
+        trips = Trip.objects.all()
+        serializer = TripSerializer(trips, many=True)
+        return Response(serializer.data)
+
+
+class TripDetailView(APIView):
+
     def get(self, request, trip_id):
+
         try:
+
             trip = Trip.objects.get(id=trip_id)
+
             serializer = TripSerializer(trip)
             data = serializer.data
 
             current_coords = (data["current_lng"], data["current_lat"])
             pickup_coords = (data["pickup_lng"], data["pickup_lat"])
             dropoff_coords = (data["dropoff_lng"], data["dropoff_lat"])
-            current_cycle_used = data["current_cycle_used"]
 
             route_data = get_route(
                 current_coords,
@@ -50,7 +55,7 @@ class TripView(APIView):
             if not route_data:
                 return Response(
                     {"error": "Route generation failed"},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=400
                 )
 
             eld_logs = generate_eld_logs(route_data["duration_hours"])
@@ -67,18 +72,11 @@ class TripView(APIView):
                 "fuel_stops": data["fuel_stops"],
                 "rest_stops": data["rest_stops"],
                 "eld_logs": eld_logs,
-                "current_cycle_used":current_cycle_used
-            }, status=status.HTTP_200_OK)
+                "current_cycle_used": data["current_cycle_used"]
+            })
 
         except Trip.DoesNotExist:
             return Response(
                 {"error": "Trip not found"},
-                status=status.HTTP_404_NOT_FOUND
+                status=404
             )
-        
-    def get(self,request):
-        trips = Trip.objects.all()
-
-        serializer = TripSerializer(trips, many=True)
-
-        return Response(serializer.data)

@@ -12,12 +12,20 @@ load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret")
 
-
-
 ALLOWED_HOSTS = os.environ.get(
-        "ALLOWED_HOSTS",
-        "127.0.0.1,localhost"
-    ).split(",")
+    "ALLOWED_HOSTS",
+    "127.0.0.1,localhost,krishna-trip-flow-assessment-server.onrender.com"
+).split(",")
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL")
+    )
+}
+
 
 
 
@@ -67,20 +75,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# =========================
-# DATABASE
-# =========================
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "tripflow",
-        "USER": "tripuser",
-        "PASSWORD": "tripflowspotterai",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
-}
 
 # =========================
 # INTERNATIONALIZATION
