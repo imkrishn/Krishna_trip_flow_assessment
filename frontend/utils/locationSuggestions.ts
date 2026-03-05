@@ -1,3 +1,11 @@
+interface ResponseType {
+  properties: {
+    name: string;
+    city: string;
+    country: string;
+  };
+}
+
 export const fetchSuggestions = async (
   value: string,
   setSuggestions: React.Dispatch<React.SetStateAction<string[]>>,
@@ -8,7 +16,7 @@ export const fetchSuggestions = async (
   const data = await res.json();
 
   const places = data.features.map(
-    (f: any) =>
+    (f: ResponseType) =>
       `${f.properties.name || ""} ${f.properties.city || ""}, ${
         f.properties.country || ""
       }`,

@@ -1,12 +1,14 @@
-import Image from "next/image";
 import { MapPin, Clock, Fuel } from "lucide-react";
+import { formatDate } from "@/utils/formatDate";
 
 interface TripCardProps {
+  id: string;
   title: string;
   distance: string;
   duration: string;
   fuelStops: number;
   status: "Ongoing" | "Completed" | "Warning" | "Drafted";
+  date: string;
 }
 
 const statusStyles = {
@@ -17,14 +19,21 @@ const statusStyles = {
 };
 
 export default function TripCard({
+  id,
   title,
   distance,
   duration,
   fuelStops,
   status,
+  date,
 }: TripCardProps) {
   return (
-    <div className=" rounded-md    my-2 p-4 cursor-pointer hover:bg-white active:bg-slate-100">
+    <div
+      onClick={() =>
+        (window.location.href = `${process.env.NEXT_PUBLIC_URL}/trip/${id}`)
+      }
+      className=" rounded-md    my-2 p-4 cursor-pointer hover:bg-white active:bg-slate-100"
+    >
       <div className="flex items-start justify-between">
         <h3 className="lg:text-lg text-sm font-semibold tracking-tight text-slate-600">
           {title}
@@ -36,9 +45,7 @@ export default function TripCard({
           {status}
         </span>
       </div>
-      <p className=" text-[10px] text-slate-400 pl-1">
-        20 February,26 - 25 February,26
-      </p>
+      <p className=" text-[10px] text-slate-400 pl-1">{formatDate(date)}</p>
       <div className="mt-3 flex items-center gap-3 lg:text-xs text-[10px] text-slate-500">
         <div className="flex items-center gap-2">
           <MapPin size={18} strokeWidth={2} className="text-green-500" />

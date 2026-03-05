@@ -2,21 +2,12 @@
 
 import TripCard from "@/components/TripCard";
 import TripsPageSkeleton from "@/components/loading/loadingTripCards";
+import { TripRouteResponse } from "@/types/responseData";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type TabType = "All" | "Ongoing" | "Completed" | "Drafted";
 type BackendStatus = "ONGOING" | "FINISHED" | "DRAFTED";
-
-interface Trip {
-  id: string;
-  pickup_location: string;
-  dropoff_location: string;
-  distance_miles: number;
-  duration_hours: number;
-  fuel_stops: any[];
-  status: BackendStatus;
-}
 
 const tabToBackendStatus: Record<Exclude<TabType, "All">, BackendStatus> = {
   Ongoing: "ONGOING",
@@ -26,7 +17,7 @@ const tabToBackendStatus: Record<Exclude<TabType, "All">, BackendStatus> = {
 
 export default function Page() {
   const [currentTab, setCurrentTab] = useState<TabType>("All");
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [trips, setTrips] = useState<TripRouteResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   const tabs: TabType[] = ["All", "Ongoing", "Completed", "Drafted"];
@@ -103,7 +94,9 @@ export default function Page() {
         <div className="space-y-4">
           {filteredTrips.map((trip) => (
             <TripCard
+              id={trip.id}
               key={trip.id}
+              date={trip.created_at}
               title={`${trip.pickup_location} → ${trip.dropoff_location}`}
               distance={`${trip.distance_miles?.toFixed(2)} miles`}
               duration={`${trip.duration_hours?.toFixed(2)} hours`}

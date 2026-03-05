@@ -18,8 +18,8 @@ interface ELD {
 }
 
 export interface TripRouteResponse {
-  trip_id: string;
-
+  id: string;
+  trip_id: String;
   current: Coordinate;
   pickup: Coordinate;
   dropoff: Coordinate;
@@ -36,4 +36,5 @@ export interface TripRouteResponse {
   rest_stops: Coordinate[];
 
   eld_logs: ELD[];
+  created_at: string;
 }
