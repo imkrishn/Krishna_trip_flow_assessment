@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { MapPin, Clock, X } from "lucide-react";
 import { fetchSuggestions } from "@/utils/locationSuggestions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface TripFormData {
   currentLocation: string;
@@ -25,6 +26,8 @@ export default function MakeTripPlan({ onClose }: { onClose?: () => void }) {
   const [clickOutside, setClickOutside] = useState<boolean>(true);
   const locationSuggestionsRef = useRef<HTMLUListElement>(null);
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -101,8 +104,17 @@ export default function MakeTripPlan({ onClose }: { onClose?: () => void }) {
       );
 
       const data = await res.json();
-      console.log("Generated Plan:", data);
-    } catch {
+
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "Trip generation failed");
+        return;
+      }
+
+      toast.success("Trip generated successfully");
+
+      router.push(`/trip/${data.trip_id}`);
+    } catch (error) {
+      console.error(error);
       toast.error("Failed to generate trip plan. Please try again.");
     } finally {
       setLoading(false);
@@ -145,6 +157,7 @@ export default function MakeTripPlan({ onClose }: { onClose?: () => void }) {
                 />
 
                 <input
+                  disabled={loading}
                   value={formData[field.name as keyof TripFormData] as string}
                   type="text"
                   name={field.name}
@@ -186,6 +199,7 @@ export default function MakeTripPlan({ onClose }: { onClose?: () => void }) {
             <div className="relative">
               <Clock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
               <input
+                disabled={loading}
                 type="number"
                 name="currentCycleUsed"
                 value={formData.currentCycleUsed}
@@ -201,7 +215,7 @@ export default function MakeTripPlan({ onClose }: { onClose?: () => void }) {
           <button
             disabled={loading}
             type="submit"
-            className={`mt-4 w-full cursor-pointer rounded-xl bg-blue-600 py-3 lg:text-sm text-xs font-semibold text-white transition-all duration-200 hover:bg-blue-700  active:scale-[0.98] ${loading ? "cursor-not-allowed opacity-70" : ""}`}
+            className={`mt-4 w-full rounded-xl bg-blue-600 py-3 lg:text-sm text-xs font-semibold text-white transition-all duration-200  ${loading ? "cursor-progress opacity-70" : "hover:bg-blue-700  active:scale-[0.98] cursor-pointer"}`}
           >
             {loading ? "Generating..." : "Generate Trip Plan"}
           </button>
