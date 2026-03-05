@@ -8,7 +8,7 @@ class Trip(models.Model):
     pickup_location = models.CharField(max_length=255)
     dropoff_location = models.CharField(max_length=255)
     current_cycle_used = models.IntegerField()
-
+    status = models.CharField(max_length=50)
     current_lat = models.FloatField(null=True, blank=True)
     current_lng = models.FloatField(null=True, blank=True)
 
