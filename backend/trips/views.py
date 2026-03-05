@@ -89,7 +89,8 @@ class TripDetailView(APIView):
                 "current": current_coords,
                 "pickup": pickup_coords,
                 "dropoff": dropoff_coords,
-
+                "pickup_location":data["pickup_location"],
+                "dropoff_location":data["dropoff_location"],
                 "distance_miles": route_data["distance_miles"],
                 "duration_hours": route_data["duration_hours"],
 
