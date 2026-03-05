@@ -8,7 +8,15 @@ class Trip(models.Model):
     pickup_location = models.CharField(max_length=255)
     dropoff_location = models.CharField(max_length=255)
     current_cycle_used = models.IntegerField()
-    status = models.CharField(max_length=50)
+    status = models.CharField(
+    max_length=20,
+    choices=[
+        ("ONGOING", "Ongoing"),
+        ("DRAFTED", "Drafted"),
+        ("FINISHED", "Finished")
+    ],
+    default="ONGOING"
+)
     current_lat = models.FloatField(null=True, blank=True)
     current_lng = models.FloatField(null=True, blank=True)
 
