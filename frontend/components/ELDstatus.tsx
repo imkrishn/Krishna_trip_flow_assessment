@@ -8,8 +8,6 @@ interface Props {
   trip: TripRouteResponse;
 }
 
-type TripStatus = "ONGOING" | "FINISHED" | "DRAFTED";
-
 export default function EldStatus({ trip }: Props) {
   const [status, setStatus] = useState<TripStatus>(trip.status);
   const [loading, setLoading] = useState(false);
