@@ -6,10 +6,18 @@ import { TripRouteResponse } from "@/types/responseData";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-type TabType = "All" | "Ongoing" | "Completed" | "Drafted";
+type TabType =
+  | "All"
+  | "Ongoing"
+  | "Completed"
+  | "Drafted"
+  | "Warning ( 8 days +)";
 type BackendStatus = "ONGOING" | "FINISHED" | "DRAFTED";
 
-const tabToBackendStatus: Record<Exclude<TabType, "All">, BackendStatus> = {
+const tabToBackendStatus: Record<
+  Exclude<TabType, "All" | "Warning ( 8 days +)">,
+  BackendStatus
+> = {
   Ongoing: "ONGOING",
   Completed: "FINISHED",
   Drafted: "DRAFTED",
@@ -20,7 +28,13 @@ export default function Page() {
   const [trips, setTrips] = useState<TripRouteResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const tabs: TabType[] = ["All", "Ongoing", "Completed", "Drafted"];
+  const tabs: TabType[] = [
+    "All",
+    "Ongoing",
+    "Completed",
+    "Drafted",
+    "Warning ( 8 days +)",
+  ];
 
   //fetch all trips of user
 
@@ -50,17 +64,27 @@ export default function Page() {
     fetchTrips();
   }, []);
 
-  //show all tab status
+  //show all tab status including Warning ( 8 days +)
+
   const filteredTrips =
     currentTab === "All"
       ? trips
-      : trips.filter((trip) => trip.status === tabToBackendStatus[currentTab]);
+      : currentTab === "Warning ( 8 days +)"
+        ? trips.filter((trip) => trip.duration_hours > 88)
+        : trips.filter(
+            (trip) => trip.status === tabToBackendStatus[currentTab],
+          );
 
   const getTabCount = (tab: TabType) => {
     if (tab === "All") return trips.length;
+    if (tab === "Warning ( 8 days +)") return;
 
-    return trips.filter((trip) => trip.status === tabToBackendStatus[tab])
-      .length;
+    const finalCount = trips.filter(
+      (trip) => trip.status === tabToBackendStatus[tab],
+    ).length;
+
+    if (finalCount === 0) return "";
+    return finalCount;
   };
 
   return (
